@@ -1,0 +1,48 @@
+# Binários
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+calculadora-iaa.exe
+
+# Arquivos de teste
+*.test
+*.out
+
+# Arquivos de build
+/dist/
+/build/
+
+# Go workspace file
+go.work
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Python (caso mantenha os arquivos Python)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
