@@ -1,58 +1,59 @@
-# ✅ Status do Projeto
+# ✅ Project Status
 
-## 📋 Resumo
+## 📋 Summary
 
-**O código está 100% correto e pronto para uso!**
+**The code is correct and ready to use.**
 
-Os erros que aparecem no linter são apenas porque o **CGO não está habilitado** e o **compilador C não está instalado**. Isso é **normal** e **esperado** - não é um problema do código.
+If you see compile errors, it is almost always the environment: **CGO disabled** or **system dependencies missing**. This is not a code issue.
 
-## ✅ O que está funcionando
+## ✅ What Works
 
-- ✅ **Código Go**: Sintaxe correta, sem erros lógicos
-- ✅ **Estrutura**: Organizada e bem separada
-- ✅ **Lógica de cálculo**: Implementada corretamente
-- ✅ **Interface gráfica**: Completa e funcional
-- ✅ **Dependências**: Todas instaladas (`go mod tidy` executado)
+- ✅ **Go code**: Correct syntax, no logical errors
+- ✅ **Structure**: Organized and well separated
+- ✅ **Calculation logic**: Implemented correctly
+- ✅ **GUI**: Complete and functional
+- ✅ **Go dependencies**: Installed with `go mod tidy`
 
-## ⚠️ O que falta (apenas configuração do ambiente)
+## ⚠️ What’s Missing (environment setup only)
 
-- ⚠️ **Compilador C**: Precisa instalar (TDM-GCC ou MSYS2)
-- ⚠️ **CGO habilitado**: Precisa configurar no terminal
+- ⚠️ **Linux**: install system dependencies (X11/OpenGL + gcc)
+- ⚠️ **Windows**: install a C compiler and enable CGO in the terminal
 
-## 🚀 Próximos passos
+## 🚀 Next Steps
 
-1. **Instalar TDM-GCC**:
-   - https://jmeubank.github.io/tdm-gcc/
-   - Adicionar ao PATH: `C:\TDM-GCC-64\bin`
-   - Reiniciar terminal
-
-2. **Executar**:
-   ```powershell
-   .\run.ps1
-   ```
-
-Ou manualmente:
-```powershell
-$env:CGO_ENABLED=1
+1. **Linux (Ubuntu/Arch)**:
+Ubuntu/Debian (apt):
+```bash
+sudo apt update
+sudo apt install -y gcc libgl1-mesa-dev xorg-dev
+go run .
+```
+Arch:
+```bash
+sudo pacman -S --needed gcc mesa libx11 libxcursor libxrandr libxinerama libxi
 go run .
 ```
 
-## 📁 Arquivos do Projeto
+2. **Windows**:
+Install TDM-GCC or MSYS2, add it to PATH, and run `go run .` with `CGO_ENABLED=1`.
+
+## 📁 Project Files
 
 ```
-✅ main.go          - Ponto de entrada (OK)
-✅ models.go        - Modelos de dados (OK)
-✅ calculos.go      - Lógica de cálculo (OK)
-✅ gui.go           - Interface gráfica (OK)
-✅ go.mod           - Dependências (OK)
+✅ main.go          - Entry point (OK)
+✅ models.go        - Data models (OK)
+✅ calculos.go      - Calculation logic (OK)
+✅ app.go           - App and initialization (OK)
+✅ ui_helpers.go    - UI helpers and validation (OK)
+✅ ui_home.go       - Home screen (OK)
+✅ ui_iaa.go        - Updated IAA screen (OK)
+✅ ui_meta.go       - IAA target screen (OK)
+✅ go.mod           - Dependencies (OK)
 ✅ go.sum           - Checksums (OK)
-✅ build.ps1        - Script de build (OK)
-✅ run.ps1          - Script de execução (OK)
-✅ README.md        - Documentação (OK)
-✅ INSTALACAO.md    - Guia de instalação (OK)
+✅ README.md        - Documentation (OK)
+✅ INSTALACAO.md    - Installation guide (OK)
 ```
 
-## ✨ Conclusão
+## ✨ Conclusion
 
-**Tudo está certo!** O projeto está completo e organizado. Apenas precisa instalar o compilador C para poder executar. O código em si não tem problemas.
-
+**Everything is set.** The project is complete and organized. It only needs environment setup (system dependencies on Linux or a C compiler on Windows). The code itself has no issues.

@@ -1,132 +1,115 @@
-# 📊 Calculadora de IAA em Go
+# 📊 IAA Calculator in Go
 
-Calculadora de IAA (Índice de Aproveitamento Acadêmico) com interface gráfica desenvolvida em Go usando Fyne.
+IAA (Academic Performance Index) calculator with a graphical interface built in Go using Fyne.
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-- ✅ **Calcular IAA Atualizado**: Adiciona novas matérias e calcula o novo IAA
-- ✅ **Calcular Meta de IAA**: Calcula a média necessária para alcançar um IAA desejado
-- ✅ Interface gráfica moderna e intuitiva
-- ✅ Gerenciamento de matérias (adicionar, editar, remover)
+- ✅ **Calculate Updated IAA**: Add new courses and calculate the updated IAA
+- ✅ **Calculate IAA Target**: Compute the required average to reach a target IAA
+- ✅ Modern, intuitive GUI
+- ✅ Course management (add, edit, remove)
 
-## 📦 Instalação
+## 📦 Installation
 
-### Pré-requisitos
+### Prerequisites
 
-1. **Instale o Go** (versão 1.21 ou superior):
-   - Download: https://golang.org/dl/
+1. **Install Go** (version 1.21 or higher). Download: https://golang.org/dl/
 
-2. **Instale um compilador C** (necessário para Fyne no Windows):
-   - **Opção 1 (Recomendado)**: TDM-GCC - https://jmeubank.github.io/tdm-gcc/
-     - Baixe a versão 64-bit
-     - Instale com opções padrão
-     - Adicione `C:\TDM-GCC-64\bin` ao PATH do sistema
-   - **Opção 2**: MSYS2 - https://www.msys2.org/
-     - Instale e execute: `pacman -S mingw-w64-x86_64-gcc`
-     - Adicione `C:\msys64\mingw64\bin` ao PATH
+2. **Linux: install Fyne dependencies (CGO + OpenGL + X11)**.
+Ubuntu/Debian (apt):
+```bash
+sudo apt update
+sudo apt install -y gcc libgl1-mesa-dev xorg-dev
+```
+Arch:
+```bash
+sudo pacman -S --needed gcc mesa libx11 libxcursor libxrandr libxinerama libxi
+```
 
-3. **Instale as dependências**:
-   ```bash
-   go mod tidy
-   ```
+3. **Windows (if needed)**: install a C compiler (TDM-GCC or MSYS2) and add it to PATH.
 
-### ⚠️ Importante: Habilitar CGO
+4. **Install Go dependencies**:
+```bash
+go mod tidy
+```
 
-No PowerShell, antes de executar:
+### ⚠️ Important: CGO
+
+- **Linux**: usually already enabled (`go env CGO_ENABLED` should return `1`).
+- **Windows (PowerShell)**:
 ```powershell
 $env:CGO_ENABLED=1
 ```
 
-## 🎯 Execução
+## 🎯 Running
 
-### Desenvolvimento
+### Development
 
-**Opção 1: Usar script (Recomendado)**
-```powershell
-.\run.ps1
-```
-
-**Opção 2: Manual no PowerShell:**
-```powershell
-$env:CGO_ENABLED=1
+**Ubuntu/Debian or Arch (recommended)**:
+```bash
 go run .
 ```
 
-**Opção 3: Manual no CMD:**
-```cmd
-set CGO_ENABLED=1
-go run .
+**Windows (manual)**: enable `CGO_ENABLED=1` and run `go run .`.
+
+### Build executable
+
+**Ubuntu/Debian or Arch**:
+```bash
+go build -o iaa-calculator
+./iaa-calculator
 ```
 
-### Compilar executável
+**Windows (manual)**: enable `CGO_ENABLED=1` and run `go build -o iaa-calculator.exe`.
 
-**Opção 1: Usar script (Recomendado)**
-```powershell
-.\build.ps1
-.\calculadora-iaa.exe
-```
+### 🔧 Troubleshooting
 
-**Opção 2: Manual no PowerShell:**
-```powershell
-$env:CGO_ENABLED=1
-go build -o calculadora-iaa.exe
-.\calculadora-iaa.exe
-```
+If you see Linux dependency errors (X11/OpenGL), install the packages listed under **Prerequisites**.
+On Windows, if you see "gcc not found", make sure a C compiler is installed and on PATH.
+See more details in `INSTALACAO.md`.
 
-**Opção 3: Manual no CMD:**
-```cmd
-set CGO_ENABLED=1
-go build -o calculadora-iaa.exe
-calculadora-iaa.exe
-```
-
-### 🔧 Solução de Problemas
-
-Se aparecer erro sobre "gcc not found":
-1. Verifique se o compilador C está instalado
-2. Verifique se está no PATH do sistema
-3. Reinicie o terminal após adicionar ao PATH
-4. Veja mais detalhes em `INSTALACAO.md`
-
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
 IaaCalculator/
-├── main.go          # Ponto de entrada da aplicação
-├── models.go        # Modelos de dados (Materia)
-├── calculos.go      # Lógica de cálculos de IAA
-├── gui.go           # Interface gráfica
-├── go.mod           # Dependências
-└── README.md        # Este arquivo
+├── main.go          # Application entry point
+├── models.go        # Data models (Course)
+├── calculos.go      # IAA calculation logic
+├── app.go           # App and initialization
+├── ui_helpers.go    # UI helpers and validation
+├── ui_home.go       # Home screen
+├── ui_iaa.go        # Updated IAA screen
+├── ui_meta.go       # IAA target screen
+├── go.mod           # Dependencies
+└── README.md        # This file
 ```
 
 ## 🎨 Interface
 
-A aplicação possui uma interface gráfica moderna com:
-- Tela inicial com menu de opções
-- Formulários organizados em cards
-- Lista de matérias com opções de editar e remover
-- Mensagens de resultado claras e coloridas
+The app includes:
+- Home screen with menu options
+- Card-based forms
+- Course table with edit/remove actions
+- Clear, readable result messages
 
-## 📝 Como Usar
+## 📝 How to Use
 
-1. **Calcular IAA Atualizado**:
-   - Informe seu IAA atual e créditos já cursados
-   - Adicione as matérias com seus créditos e notas
-   - Clique em "Calcular IAA" para ver o resultado
+1. **Calculate Updated IAA**:
+   - Enter current IAA and completed credits
+   - Add courses with credits and grades
+   - Click "Calculate IAA" to see the result
 
-2. **Calcular Meta de IAA**:
-   - Informe seu IAA atual e créditos já cursados
-   - Informe os créditos do semestre atual
-   - Informe o IAA que deseja alcançar
-   - Clique em "Calcular Meta" para ver a média necessária
+2. **Calculate IAA Target**:
+   - Enter current IAA and completed credits
+   - Enter the current semester credits
+   - Enter the target IAA
+   - Click "Calculate Target" to see the required average
 
-## 🔧 Tecnologias
+## 🔧 Tech
 
-- **Go 1.21+**: Linguagem de programação
-- **Fyne v2**: Framework para interface gráfica
+- **Go 1.21+**
+- **Fyne v2**
 
-## 📄 Licença
+## 📄 License
 
-Este projeto é de uso livre para fins educacionais.
-
+This project is free to use for educational purposes.

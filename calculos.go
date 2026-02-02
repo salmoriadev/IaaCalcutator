@@ -2,43 +2,43 @@ package main
 
 import "fmt"
 
-// CalcularIAAAtualizado calcula o IAA após adicionar novas matérias
-func CalcularIAAAtualizado(iaaAtual float64, creditosCursados int, materias []Materia) (float64, error) {
-	if creditosCursados < 0 {
-		return 0, fmt.Errorf("créditos cursados devem ser não negativos")
+// CalculateUpdatedIAA calculates the IAA after adding new courses.
+func CalculateUpdatedIAA(currentIAA float64, completedCredits int, courses []Course) (float64, error) {
+	if completedCredits < 0 {
+		return 0, fmt.Errorf("completed credits must be non-negative")
 	}
 
-	if creditosCursados == 0 && len(materias) == 0 {
-		return 0, fmt.Errorf("adicione créditos para calcular")
+	if completedCredits == 0 && len(courses) == 0 {
+		return 0, fmt.Errorf("add credits to calculate")
 	}
 
-	// Calcular pontos totais
-	pontosTotais := iaaAtual * float64(creditosCursados)
-	creditosTotais := creditosCursados
+	// Calculate total points.
+	totalPoints := currentIAA * float64(completedCredits)
+	totalCredits := completedCredits
 
-	for _, m := range materias {
-		pontosTotais += m.Nota * float64(m.Creditos)
-		creditosTotais += m.Creditos
+	for _, c := range courses {
+		totalPoints += c.Grade * float64(c.Credits)
+		totalCredits += c.Credits
 	}
 
-	if creditosTotais == 0 {
-		return 0, fmt.Errorf("não há créditos registrados")
+	if totalCredits == 0 {
+		return 0, fmt.Errorf("no credits recorded")
 	}
 
-	return pontosTotais / float64(creditosTotais), nil
+	return totalPoints / float64(totalCredits), nil
 }
 
-// CalcularMetaIAA calcula a média necessária para alcançar um IAA objetivo
-func CalcularMetaIAA(iaaAtual float64, creditosCursados int, creditosSemestre int, objetivo float64) (float64, float64, error) {
-	if creditosSemestre <= 0 {
-		return 0, 0, fmt.Errorf("créditos do semestre devem ser positivos")
+// CalculateIAATarget calculates the required average to reach a target IAA.
+func CalculateIAATarget(currentIAA float64, completedCredits int, semesterCredits int, target float64) (float64, float64, error) {
+	if semesterCredits <= 0 {
+		return 0, 0, fmt.Errorf("semester credits must be positive")
 	}
 
-	totalCreditos := creditosCursados + creditosSemestre
-	pontosAtuais := iaaAtual * float64(creditosCursados)
-	pontosNecessarios := objetivo * float64(totalCreditos)
-	pontosFaltam := pontosNecessarios - pontosAtuais
-	mediaNecessaria := pontosFaltam / float64(creditosSemestre)
+	totalCredits := completedCredits + semesterCredits
+	currentPoints := currentIAA * float64(completedCredits)
+	requiredPoints := target * float64(totalCredits)
+	pointsNeeded := requiredPoints - currentPoints
+	requiredAverage := pointsNeeded / float64(semesterCredits)
 
-	return mediaNecessaria, pontosFaltam, nil
+	return requiredAverage, pointsNeeded, nil
 }

@@ -1,7 +1,7 @@
 package main
 
-// main inicia a aplicação GUI
+// main starts the GUI application.
 func main() {
-	app := NovaApp()
-	app.Iniciar()
+	app := NewApp()
+	app.Start()
 }
