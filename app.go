@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// App represents the GUI application.
 type App struct {
 	app              fyne.App
 	window           fyne.Window
@@ -17,7 +16,6 @@ type App struct {
 	resultLabel      *widget.Label
 }
 
-// NewApp creates a new application instance.
 func NewApp() *App {
 	myApp := app.NewWithID("iaa.calculator")
 	window := myApp.NewWindow("📊 IAA Calculator")
@@ -31,7 +29,6 @@ func NewApp() *App {
 	}
 }
 
-// Start shows the home screen and starts the app loop.
 func (a *App) Start() {
 	a.createHomeScreen()
 	a.window.ShowAndRun()

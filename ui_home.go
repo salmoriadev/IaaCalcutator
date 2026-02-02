@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// createHomeScreen creates the home screen with the menu.
 func (a *App) createHomeScreen() {
 	a.currentIAA = widget.NewEntry()
 	a.currentIAA.SetPlaceHolder("e.g. 8.5")

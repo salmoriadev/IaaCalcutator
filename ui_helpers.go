@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// UI helper methods.
 func (a *App) createCard(title string, content fyne.CanvasObject) *widget.Card {
 	return widget.NewCard(title, "", content)
 }
@@ -19,7 +18,6 @@ func (a *App) fieldWithLabel(labelText string, entry *widget.Entry) fyne.CanvasO
 	return container.NewBorder(nil, nil, widget.NewLabel(labelText), nil, entry)
 }
 
-// Validation helpers.
 func (a *App) validateBaseInputs() (float64, int, error) {
 	currentIAAStr := strings.TrimSpace(a.currentIAA.Text)
 	currentIAA, err := strconv.ParseFloat(currentIAAStr, 64)
@@ -42,4 +40,13 @@ func (a *App) validateBaseInputs() (float64, int, error) {
 	}
 
 	return currentIAA, completedCredits, nil
+}
+
+func allFilled(entries ...*widget.Entry) bool {
+	for _, entry := range entries {
+		if strings.TrimSpace(entry.Text) == "" {
+			return false
+		}
+	}
+	return true
 }

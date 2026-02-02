@@ -12,7 +12,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// showUpdatedIAAScreen creates the screen to calculate the updated IAA.
 func (a *App) showUpdatedIAAScreen() {
 	a.courses = []Course{}
 
@@ -23,108 +22,20 @@ func (a *App) showUpdatedIAAScreen() {
 	entryGrade := widget.NewEntry()
 	entryGrade.SetPlaceHolder("Grade (0-10)")
 
-	// Courses table.
-	a.coursesTable = widget.NewTable(
-		func() (int, int) { return len(a.courses) + 1, 4 },
-		func() fyne.CanvasObject {
-			label := widget.NewLabel("")
-			label.Wrapping = fyne.TextWrapWord
-
-			btnEdit := widget.NewButton("✏️", nil)
-			btnRemove := widget.NewButton("🗑️", nil)
-			actions := container.NewHBox(layout.NewSpacer(), btnEdit, btnRemove)
-
-			return container.NewStack(label, actions)
-		},
-		func(id widget.TableCellID, obj fyne.CanvasObject) {
-			cell := obj.(*fyne.Container)
-			label := cell.Objects[0].(*widget.Label)
-			actions := cell.Objects[1].(*fyne.Container)
-
-			btnEdit := actions.Objects[1].(*widget.Button)
-			btnRemove := actions.Objects[2].(*widget.Button)
-
-			if id.Row == 0 {
-				label.Show()
-				actions.Hide()
-				label.TextStyle = fyne.TextStyle{Bold: true}
-				switch id.Col {
-				case 0:
-					label.Alignment = fyne.TextAlignLeading
-					label.SetText("Name")
-				case 1:
-					label.Alignment = fyne.TextAlignCenter
-					label.SetText("Credits")
-				case 2:
-					label.Alignment = fyne.TextAlignCenter
-					label.SetText("Grade")
-				case 3:
-					label.Alignment = fyne.TextAlignCenter
-					label.SetText("Actions")
-				}
-				return
-			}
-
-			idx := id.Row - 1
-			if idx < 0 || idx >= len(a.courses) {
-				label.TextStyle = fyne.TextStyle{}
-				label.Alignment = fyne.TextAlignLeading
-				label.SetText("")
-				label.Show()
-				actions.Hide()
-				btnEdit.OnTapped = nil
-				btnRemove.OnTapped = nil
-				return
-			}
-
-			c := a.courses[idx]
-			label.TextStyle = fyne.TextStyle{}
-			switch id.Col {
-			case 0:
-				label.Alignment = fyne.TextAlignLeading
-				label.SetText(c.Name)
-				label.Show()
-				actions.Hide()
-			case 1:
-				label.Alignment = fyne.TextAlignCenter
-				label.SetText(strconv.Itoa(c.Credits))
-				label.Show()
-				actions.Hide()
-			case 2:
-				label.Alignment = fyne.TextAlignCenter
-				label.SetText(fmt.Sprintf("%.2f", c.Grade))
-				label.Show()
-				actions.Hide()
-			case 3:
-				label.SetText("")
-				label.Hide()
-				actions.Show()
-				btnEdit.OnTapped = func() {
-					a.editCourse(idx, entryName, entryCredits, entryGrade)
-				}
-				btnRemove.OnTapped = func() {
-					a.removeCourse(idx)
-				}
-			}
-		},
-	)
-	a.coursesTable.SetColumnWidth(0, 360)
-	a.coursesTable.SetColumnWidth(1, 100)
-	a.coursesTable.SetColumnWidth(2, 100)
-	a.coursesTable.SetColumnWidth(3, 140)
+	a.coursesTable = a.newCoursesTable(entryName, entryCredits, entryGrade)
 
 	btnAdd := widget.NewButton("➕ Add", func() {
 		a.addCourse(entryName, entryCredits, entryGrade)
 	})
 
-	helpLabel := widget.NewLabel("")
-	helpLabel.Alignment = fyne.TextAlignCenter
-	helpLabel.TextStyle = fyne.TextStyle{Italic: true}
+	hintLabel := widget.NewLabel("")
+	hintLabel.Alignment = fyne.TextAlignCenter
+	hintLabel.TextStyle = fyne.TextStyle{Italic: true}
 
 	btnCalculate := widget.NewButton("✅ Calculate IAA", nil)
 	btnClear := widget.NewButton("🗑️ Clear", func() {
 		a.clearUpdatedFields(entryName, entryCredits, entryGrade)
-		updateCalculateState(btnCalculate, helpLabel, a.currentIAA, a.completedCredits)
+		updateCalculateState(btnCalculate, hintLabel, a.currentIAA, a.completedCredits)
 	})
 	btnBack := widget.NewButton("⬅️ Back", a.createHomeScreen)
 
@@ -133,7 +44,7 @@ func (a *App) showUpdatedIAAScreen() {
 	a.resultLabel.Wrapping = fyne.TextWrapWord
 
 	update := func() {
-		updateCalculateState(btnCalculate, helpLabel, a.currentIAA, a.completedCredits)
+		updateCalculateState(btnCalculate, hintLabel, a.currentIAA, a.completedCredits)
 	}
 	btnCalculate.OnTapped = a.calculateUpdatedIAA
 	a.currentIAA.OnChanged = func(string) { update() }
@@ -167,18 +78,127 @@ func (a *App) showUpdatedIAAScreen() {
 		subtitle,
 		formFrame,
 		container.NewGridWithColumns(3, btnCalculate, btnClear, btnBack),
-		helpLabel,
+		hintLabel,
 		a.resultLabel,
 	)
 
 	a.window.SetContent(container.NewVScroll(content))
 }
 
-func updateCalculateState(btn *widget.Button, hint *widget.Label, iaaEntry, creditsEntry *widget.Entry) {
-	iaaOk := strings.TrimSpace(iaaEntry.Text) != ""
-	creditsOk := strings.TrimSpace(creditsEntry.Text) != ""
+func (a *App) newCoursesTable(entryName, entryCredits, entryGrade *widget.Entry) *widget.Table {
+	table := widget.NewTable(
+		func() (int, int) { return len(a.courses) + 1, 4 },
+		newCourseCell,
+		func(id widget.TableCellID, obj fyne.CanvasObject) {
+			a.updateCourseCell(id, obj.(*fyne.Container), entryName, entryCredits, entryGrade)
+		},
+	)
+	table.SetColumnWidth(0, 360)
+	table.SetColumnWidth(1, 100)
+	table.SetColumnWidth(2, 100)
+	table.SetColumnWidth(3, 140)
+	return table
+}
 
-	if iaaOk && creditsOk {
+func newCourseCell() fyne.CanvasObject {
+	label := widget.NewLabel("")
+	label.Wrapping = fyne.TextWrapWord
+
+	btnEdit := widget.NewButton("✏️", nil)
+	btnRemove := widget.NewButton("🗑️", nil)
+	actions := container.NewHBox(layout.NewSpacer(), btnEdit, btnRemove)
+
+	return container.NewStack(label, actions)
+}
+
+func (a *App) updateCourseCell(id widget.TableCellID, cell *fyne.Container, entryName, entryCredits, entryGrade *widget.Entry) {
+	label := cell.Objects[0].(*widget.Label)
+	actions := cell.Objects[1].(*fyne.Container)
+	btnEdit := actions.Objects[1].(*widget.Button)
+	btnRemove := actions.Objects[2].(*widget.Button)
+
+	if id.Row == 0 {
+		label.Show()
+		actions.Hide()
+		label.TextStyle = fyne.TextStyle{Bold: true}
+		label.Alignment = courseColumnAlignment(id.Col)
+		label.SetText(courseHeader(id.Col))
+		btnEdit.OnTapped = nil
+		btnRemove.OnTapped = nil
+		return
+	}
+
+	idx := id.Row - 1
+	if idx < 0 || idx >= len(a.courses) {
+		label.TextStyle = fyne.TextStyle{}
+		label.Alignment = fyne.TextAlignLeading
+		label.SetText("")
+		label.Show()
+		actions.Hide()
+		btnEdit.OnTapped = nil
+		btnRemove.OnTapped = nil
+		return
+	}
+
+	if id.Col == 3 {
+		label.SetText("")
+		label.Hide()
+		actions.Show()
+		btnEdit.OnTapped = func() {
+			a.editCourse(idx, entryName, entryCredits, entryGrade)
+		}
+		btnRemove.OnTapped = func() {
+			a.removeCourse(idx)
+		}
+		return
+	}
+
+	label.TextStyle = fyne.TextStyle{}
+	label.Alignment = courseColumnAlignment(id.Col)
+	label.SetText(courseValue(a.courses[idx], id.Col))
+	label.Show()
+	actions.Hide()
+	btnEdit.OnTapped = nil
+	btnRemove.OnTapped = nil
+}
+
+func courseHeader(col int) string {
+	switch col {
+	case 0:
+		return "Name"
+	case 1:
+		return "Credits"
+	case 2:
+		return "Grade"
+	case 3:
+		return "Actions"
+	default:
+		return ""
+	}
+}
+
+func courseColumnAlignment(col int) fyne.TextAlign {
+	if col == 0 {
+		return fyne.TextAlignLeading
+	}
+	return fyne.TextAlignCenter
+}
+
+func courseValue(course Course, col int) string {
+	switch col {
+	case 0:
+		return course.Name
+	case 1:
+		return strconv.Itoa(course.Credits)
+	case 2:
+		return fmt.Sprintf("%.2f", course.Grade)
+	default:
+		return ""
+	}
+}
+
+func updateCalculateState(btn *widget.Button, hint *widget.Label, entries ...*widget.Entry) {
+	if allFilled(entries...) {
 		btn.Enable()
 		if hint != nil {
 			hint.SetText("")
@@ -192,7 +212,6 @@ func updateCalculateState(btn *widget.Button, hint *widget.Label, iaaEntry, cred
 	}
 }
 
-// Course handlers.
 func (a *App) addCourse(entryName, entryCredits, entryGrade *widget.Entry) {
 	name := strings.TrimSpace(entryName.Text)
 	creditsStr := strings.TrimSpace(entryCredits.Text)
@@ -234,9 +253,9 @@ func (a *App) removeCourse(id int) {
 		return
 	}
 
-	c := a.courses[id]
+	course := a.courses[id]
 	dialog.ShowConfirm("Confirm Removal",
-		fmt.Sprintf("Remove this course?\n\n%s - %d credits → Grade: %.2f", c.Name, c.Credits, c.Grade),
+		fmt.Sprintf("Remove this course?\n\n%s - %d credits → Grade: %.2f", course.Name, course.Credits, course.Grade),
 		func(confirmed bool) {
 			if confirmed {
 				a.courses = append(a.courses[:id], a.courses[id+1:]...)
@@ -252,19 +271,17 @@ func (a *App) editCourse(id int, entryName, entryCredits, entryGrade *widget.Ent
 		return
 	}
 
-	c := a.courses[id]
-	entryName.SetText(c.Name)
-	entryCredits.SetText(strconv.Itoa(c.Credits))
-	entryGrade.SetText(fmt.Sprintf("%.2f", c.Grade))
+	course := a.courses[id]
+	entryName.SetText(course.Name)
+	entryCredits.SetText(strconv.Itoa(course.Credits))
+	entryGrade.SetText(fmt.Sprintf("%.2f", course.Grade))
 
-	// Remove the old course to re-add the edited one.
 	a.courses = append(a.courses[:id], a.courses[id+1:]...)
 	if a.coursesTable != nil {
 		a.coursesTable.Refresh()
 	}
 }
 
-// Calculation handlers.
 func (a *App) calculateUpdatedIAA() {
 	currentIAA, completedCredits, err := a.validateBaseInputs()
 	if err != nil {

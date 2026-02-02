@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// showIAATargetScreen creates the screen to calculate the IAA target.
 func (a *App) showIAATargetScreen() {
 	entrySemesterCredits := widget.NewEntry()
 	entrySemesterCredits.SetPlaceHolder("Semester credits")
@@ -22,19 +21,19 @@ func (a *App) showIAATargetScreen() {
 	resultLabel.Alignment = fyne.TextAlignCenter
 	resultLabel.Wrapping = fyne.TextWrapWord
 
-	helpLabel := widget.NewLabel("")
-	helpLabel.Alignment = fyne.TextAlignCenter
-	helpLabel.TextStyle = fyne.TextStyle{Italic: true}
+	hintLabel := widget.NewLabel("")
+	hintLabel.Alignment = fyne.TextAlignCenter
+	hintLabel.TextStyle = fyne.TextStyle{Italic: true}
 
 	btnCalculate := widget.NewButton("🎯 Calculate Target", nil)
 	btnClear := widget.NewButton("🗑️ Clear", func() {
 		a.clearTargetFields(entrySemesterCredits, entryTargetIAA, resultLabel)
-		updateTargetState(btnCalculate, helpLabel, a.currentIAA, a.completedCredits, entrySemesterCredits, entryTargetIAA)
+		updateTargetState(btnCalculate, hintLabel, a.currentIAA, a.completedCredits, entrySemesterCredits, entryTargetIAA)
 	})
 	btnBack := widget.NewButton("⬅️ Back", a.createHomeScreen)
 
 	update := func() {
-		updateTargetState(btnCalculate, helpLabel, a.currentIAA, a.completedCredits, entrySemesterCredits, entryTargetIAA)
+		updateTargetState(btnCalculate, hintLabel, a.currentIAA, a.completedCredits, entrySemesterCredits, entryTargetIAA)
 	}
 	btnCalculate.OnTapped = func() {
 		a.calculateIAATarget(entrySemesterCredits, entryTargetIAA, resultLabel)
@@ -62,7 +61,7 @@ func (a *App) showIAATargetScreen() {
 		subtitle,
 		formFrame,
 		container.NewGridWithColumns(3, btnCalculate, btnClear, btnBack),
-		helpLabel,
+		hintLabel,
 		resultLabel,
 	)
 
@@ -70,19 +69,17 @@ func (a *App) showIAATargetScreen() {
 }
 
 func updateTargetState(btn *widget.Button, hint *widget.Label, entries ...*widget.Entry) {
-	for _, entry := range entries {
-		if strings.TrimSpace(entry.Text) == "" {
-			btn.Disable()
-			if hint != nil {
-				hint.SetText("Fill in all fields to calculate.")
-			}
-			return
+	if allFilled(entries...) {
+		btn.Enable()
+		if hint != nil {
+			hint.SetText("")
 		}
+		return
 	}
 
-	btn.Enable()
+	btn.Disable()
 	if hint != nil {
-		hint.SetText("")
+		hint.SetText("Fill in all fields to calculate.")
 	}
 }
 
@@ -100,19 +97,19 @@ func (a *App) calculateIAATarget(entrySemesterCredits, entryTargetIAA *widget.En
 		return
 	}
 
-	targetStr := strings.TrimSpace(entryTargetIAA.Text)
-	target, err := strconv.ParseFloat(targetStr, 64)
+	targetIAAStr := strings.TrimSpace(entryTargetIAA.Text)
+	targetIAA, err := strconv.ParseFloat(targetIAAStr, 64)
 	if err != nil {
 		dialog.ShowError(fmt.Errorf("invalid target IAA"), a.window)
 		return
 	}
 
-	if target < 0 || target > 10 {
+	if targetIAA < 0 || targetIAA > 10 {
 		dialog.ShowError(fmt.Errorf("target IAA must be between 0 and 10"), a.window)
 		return
 	}
 
-	requiredAverage, pointsNeeded, err := CalculateIAATarget(currentIAA, completedCredits, semesterCredits, target)
+	requiredAverage, pointsNeeded, err := CalculateIAATarget(currentIAA, completedCredits, semesterCredits, targetIAA)
 	if err != nil {
 		dialog.ShowError(err, a.window)
 		return
@@ -122,10 +119,10 @@ func (a *App) calculateIAATarget(entrySemesterCredits, entryTargetIAA *widget.En
 	if requiredAverage > 10 {
 		result = "❌ It is not possible to reach this IAA with the planned credits."
 	} else if requiredAverage < 0 {
-		result = fmt.Sprintf("✅ You have already reached IAA %.2f!\n(required average: %.2f)", target, requiredAverage)
+		result = fmt.Sprintf("✅ You have already reached IAA %.2f!\n(required average: %.2f)", targetIAA, requiredAverage)
 	} else {
 		result = fmt.Sprintf("🎯 To reach IAA %.2f:\n\n📊 Required average: %.2f\n📈 Required total: %.2f",
-			target, requiredAverage, pointsNeeded)
+			targetIAA, requiredAverage, pointsNeeded)
 	}
 
 	resultLabel.SetText(result)
